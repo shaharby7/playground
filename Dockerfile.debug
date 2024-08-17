@@ -1,0 +1,13 @@
+# syntax=docker/dockerfile:1
+FROM golang:1.21-alpine3.18 AS build
+WORKDIR /app
+COPY ./ ./
+RUN go mod download
+RUN CGO_ENABLED=0 go install -ldflags "-s -w -extldflags '-static'" github.com/go-delve/delve/cmd/dlv@latest
+RUN CGO_ENABLED=0 go build -gcflags "all=-N -l" -o /program ./cmd/main.go
+
+#######
+FROM build
+WORKDIR /
+COPY --from=build /program /program
+CMD [ "/go/bin/dlv", "--listen=:4000", "--headless=true", "--log=true", "--accept-multiclient", "--api-version=2", "exec", "/program" ]

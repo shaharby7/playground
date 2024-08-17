@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test
+  template:
+    metadata:
+      labels:
+        app: test
+    spec:
+      containers:
+      - name: test
+        image: shaharby7/test:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 3000
+        - containerPort: 4000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test
+spec:
+  type: LoadBalancer
+  selector:
+    app: test
+  ports:
+  - protocol: TCP
+    port: 3000
+    targetPort: 3000
+    name: app
+  - protocol: TCP
+    port: 4000
+    targetPort: 4000
+    name: dlv
+
